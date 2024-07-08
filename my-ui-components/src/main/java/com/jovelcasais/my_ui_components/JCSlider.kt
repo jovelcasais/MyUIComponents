@@ -10,7 +10,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,59 +18,88 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * @param sliderModifier - Lets you modify the Slider Layout.
+ * @param sliderItems Current value of the Slider. Supports different data types.
+ * @param value Current value of the slider.
+ * @param sliderLineHeight Line height of the slider, default is 10.dp
+ * @param paddingTopIndicator Distance padding top between the slider and the label indicator, default is 50.dp
+ * @param showAllLabelIndicator Shows all label indicator if true
+ * @param showLineIndicator Shows vertical line indicator/divider if true
+ * @param sliderColors Let you modify the slider active, inactive and thumb tick color
+ * @param indicatorTextSize Text Size font size in float
+ */
 @Composable
-fun JCSlider(sliderItems: List<String>, value: Float, onValueChange: (Int) -> Unit) {
+fun JCSlider(sliderModifier: Modifier = Modifier,
+             sliderItems: List<String>,
+             value: Float, onValueChange: (Int) -> Unit,
+             sliderLineHeight : Dp = 10.dp,
+             paddingTopIndicator : Dp = 50.dp,
+             showAllLabelIndicator : Boolean = true,
+             showLineIndicator: Boolean = true,
+             sliderColors: SliderColors = customDefaultSliderColors(),
+             indicatorTextSize : Float = 40f
+) {
 
-    val (sliderValue, setSliderValue) = remember { mutableStateOf(value) }
+    val (sliderValue, setSliderValue) = remember { mutableFloatStateOf(value) }
     val drawPadding = with(LocalDensity.current) { 10.dp.toPx() }
-    val textSize = with(LocalDensity.current) { 15.dp.toPx() }
-    val lineHeightDp = 10.dp // set line height of the slider
-    val lineHeightPx = with(LocalDensity.current) { lineHeightDp.toPx() }
-    val canvasHeight = 50.dp //set height padding of indicator
+    val textSize = with(LocalDensity.current) { indicatorTextSize }
+    val lineHeightPx = with(LocalDensity.current) { sliderLineHeight.toPx() }
+
     val textPaint = android.graphics.Paint().apply {
         color = if (isSystemInDarkTheme()) 0xffffffff.toInt() else 0xffff47586B.toInt()
         textAlign = android.graphics.Paint.Align.CENTER
-        this.textSize = textSize //set text size
+        this.textSize = textSize
     }
 
     Box(contentAlignment = Alignment.Center) {
 
         Canvas(
             modifier = Modifier
-                .height(canvasHeight)
+                .height(paddingTopIndicator)
                 .fillMaxWidth()
                 .padding(
-                    top = canvasHeight
+                    top = paddingTopIndicator
                         .div(2)
-                        .minus(lineHeightDp.div(2))
+                        .minus(sliderLineHeight.div(2))
                 )
         ) {
             val yStart = 0f
-            val distance = (size.width.minus(2 * drawPadding)).div(sliderItems.size.minus(1))
-            sliderItems.forEachIndexed { index, date ->
-                drawLine(
-                    color = Color.DarkGray,
-                    start = Offset(x = drawPadding + index.times(distance), y = yStart),
-                    end = Offset(x = drawPadding + index.times(distance), y = lineHeightPx)
-                )
-                //if (index.rem(2) == 1) { // set items display can be alternate empty
+            val distance = (size.width - 2 * drawPadding) / (sliderItems.size - 1)
+            val xPositions = sliderItems.indices.map { drawPadding + it * distance }
+
+            sliderItems.forEachIndexed { index, item ->
+                val xPosition = xPositions[index]
+
+                if(showLineIndicator){
+                    // Draw the line
+                    drawLine(
+                        color = Color.DarkGray,
+                        start = Offset(x = xPosition, y = yStart),
+                        end = Offset(x = xPosition, y = lineHeightPx)
+                    )
+                }
+
+                // Draw the text
+                if (showAllLabelIndicator || index % 2 == 1) {
                     this.drawContext.canvas.nativeCanvas.drawText(
-                        date,
-                        drawPadding + index.times(distance),
+                        item,
+                        xPosition,
                         size.height,
                         textPaint
                     )
-               // }
+                }
             }
         }
         Slider(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = sliderModifier.fillMaxWidth(),
             value = sliderValue,
             valueRange = 0f..sliderItems.size.minus(1).toFloat(),
             steps = sliderItems.size.minus(2),
-            colors = customSliderColors(),
+            colors = sliderColors,
             onValueChange = {
                 setSliderValue(it)
                 onValueChange(it.toInt())
@@ -80,7 +109,7 @@ fun JCSlider(sliderItems: List<String>, value: Float, onValueChange: (Int) -> Un
 
 
 @Composable
-private fun customSliderColors(): SliderColors = SliderDefaults.colors(
+private fun customDefaultSliderColors(): SliderColors = SliderDefaults.colors(
     activeTickColor = Color.Transparent,
     inactiveTickColor = Color.Transparent
 )
