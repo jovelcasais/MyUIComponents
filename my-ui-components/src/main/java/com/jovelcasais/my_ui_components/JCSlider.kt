@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
  * @param paddingTopIndicator Distance padding top between the slider and the label indicator, default is 50.dp
  * @param showAllLabelIndicator Shows all label indicator if true
  * @param showLineIndicator Shows vertical line indicator/divider if true
- * @param sliderColors Let you modify the slider active, inactive and thumb tick color
+ * @param sliderColors Let you modify the slider active, inactive and circle thumb tick color
  * @param indicatorTextSize Text Size font size in float
  */
 @Composable
