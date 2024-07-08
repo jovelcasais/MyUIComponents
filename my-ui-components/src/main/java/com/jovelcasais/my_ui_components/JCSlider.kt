@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * @param sliderModifier - Lets you modify the Slider Layout.
+ * @param modifier - Lets you modify the Slider Layout.
  * @param sliderItems Current value of the Slider. Supports different data types.
  * @param value Current value of the slider.
  * @param sliderLineHeight Line height of the slider, default is 10.dp
@@ -30,10 +30,10 @@ import androidx.compose.ui.unit.dp
  * @param showAllLabelIndicator Shows all label indicator if true
  * @param showLineIndicator Shows vertical line indicator/divider if true
  * @param sliderColors Let you modify the slider active, inactive and circle thumb tick color
- * @param indicatorTextSize Text Size font size in float
+ * @param indicatorTextSize Text size font size in float
  */
 @Composable
-fun JCSlider(sliderModifier: Modifier = Modifier,
+fun JCSlider(modifier: Modifier = Modifier,
              sliderItems: List<String>,
              value: Float, onValueChange: (Int) -> Unit,
              sliderLineHeight : Dp = 10.dp,
@@ -95,7 +95,7 @@ fun JCSlider(sliderModifier: Modifier = Modifier,
             }
         }
         Slider(
-            modifier = sliderModifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             value = sliderValue,
             valueRange = 0f..sliderItems.size.minus(1).toFloat(),
             steps = sliderItems.size.minus(2),
